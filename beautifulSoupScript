@@ -1,0 +1,45 @@
+#Scrape HTML Content
+
+pip3 install requests
+
+import requests
+url='https://www.nse.co.ke/market-statistics/equity-statistics.html?view=statistics'
+page=requests.get(url)
+
+#Parse HTML using Beautiful Soup
+pip3 install beautifulsoup4
+
+from bs4 import BeautifulSoup
+soup=BeautifulSoup(page.content, 'html.parser')
+
+#Find specific element by it's ID
+results=soup.find(id='nsx-leftc')
+
+#To See the content of HTML
+print(results.prettify())
+
+#Find elements by Class name probably consider to use https://htmlformatter.com/
+result = results.find_all('tr', class_ = 'row1')
+
+#Formatting to a tabular dataset
+sharef=[]
+for resul in result:
+    company_name = resul.find('td', class_ = 'itemt')
+    Last_Traded_Price_Ksh = resul.find('td', class_ = 'tprice')
+    d_change = resul.find('div', class_='changediv')
+    
+    company_name=company_name.text.strip()
+    company_nam=company_name
+    
+    Last_Traded_Price_Ksh=Last_Traded_Price_Ksh.text.strip()
+    Last_Traded_Price_Ks=Last_Traded_Price_Ksh
+    
+    d_change=d_change.text.strip()
+    d_chang=d_change
+    
+    sharef.append((company_nam,Last_Traded_Price_Ks,d_chang))
+    
+#Export to CSV
+import pandas as pd
+df=pd.DataFrame(sharef, columns=['company_nam','Last_Traded_Price_Ks','d_chang'])
+df.to_csv('sharef.csv', index=False, encoding='utf-8')
